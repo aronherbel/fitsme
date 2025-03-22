@@ -1,18 +1,18 @@
-import { Text, View, StyleSheet, ScrollView, Button } from 'react-native';
+import { Text, View, StyleSheet, SafeAreaView } from 'react-native';
 import UpperClothing from '../components/clothes/UpperClothing';
 import Trousers from '../components/clothes/Trousers';
 import Shoes from '../components/clothes/Shoes';
 
 export default function CreateOutfits() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Create Outfits</Text>
       <View style={styles.clothingContainer}>
         <UpperClothing />
-        <Trousers />
+        <Trousers style={styles.middleComponent} />
         <Shoes />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -20,18 +20,25 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
     width: '100%',
-    marginBottom: 2
+    flex: 1,
+    paddingBottom: 100,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 10,
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 10,
   },
   clothingContainer: {
     alignItems: 'center',
     paddingBottom: 0,
     paddingTop: 0,
+    flex: 1,
+    justifyContent: 'center',
+    gap: 10,
+  },
+  middleComponent: {
+    marginVertical: 10,
   },
 });

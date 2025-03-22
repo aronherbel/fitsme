@@ -1,11 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import OutfitBuilderScreen from './screens/OutfitBuilderScreen';
+import { StyleSheet, View } from 'react-native';
+import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <OutfitBuilderScreen />
+      <AppNavigator />
       <StatusBar style="auto" />
     </View>
   );
@@ -13,9 +13,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 50,
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
   },
 });
