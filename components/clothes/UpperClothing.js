@@ -113,8 +113,13 @@ export default function UpperClothing(props) {
     if (index < upperClothes.length) {
       setSelectedIndex(index);
       // Sofort die aktuelle Auswahl aktualisieren, nicht auf den useEffect warten
-      if (props.onSelectedItemChange && upperClothes.length > 0) {
+      if (props.onSelectedItemChange) {
         props.onSelectedItemChange(upperClothes[index]);
+      }
+    } else {
+      // Wenn der Index auf den "Add Button" zeigt (letztes Element), setze die Auswahl auf null
+      if (props.onSelectedItemChange) {
+        props.onSelectedItemChange(null);
       }
     }
   };

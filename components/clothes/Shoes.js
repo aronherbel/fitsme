@@ -113,8 +113,13 @@ export default function Shoes(props) {
     if (index < shoes.length) {
       setSelectedIndex(index);
       // Sofort die aktuelle Auswahl aktualisieren, nicht auf den useEffect warten
-      if (props.onSelectedItemChange && shoes.length > 0) {
+      if (props.onSelectedItemChange) {
         props.onSelectedItemChange(shoes[index]);
+      }
+    } else {
+      // Wenn der Index auf den "Add Button" zeigt (letztes Element), setze die Auswahl auf null
+      if (props.onSelectedItemChange) {
+        props.onSelectedItemChange(null);
       }
     }
   };

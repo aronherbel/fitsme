@@ -48,11 +48,20 @@ export default function ClothingCarousel({ items, onAddPress, onDeletePress, onI
     const offset = event.nativeEvent.contentOffset.x;
     const activeIndex = Math.floor(offset / slideWidth);
     
+    // Aktuellen Index aktualisieren und Callback informieren
+    setActiveIndex(activeIndex);
+    
+    // Prüfen, ob der aktive Index auf ein Kleidungsstück oder den Add-Button zeigt
     if (activeIndex < items.length) {
-      setActiveIndex(activeIndex);
-      // Sofort die Änderung an die übergeordnete Komponente weitergeben
+      // Wenn ein gültiges Kleidungsstück angezeigt wird
       if (onItemChange) {
         onItemChange(activeIndex);
+      }
+    } else {
+      // Wenn der Add-Button angezeigt wird
+      if (onItemChange) {
+        // Ein Index außerhalb des gültigen Bereichs signalisiert, dass kein Item ausgewählt ist
+        onItemChange(-1);
       }
     }
   };

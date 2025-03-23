@@ -113,8 +113,13 @@ export default function Trousers(props) {
     if (index < trousers.length) {
       setSelectedIndex(index);
       // Sofort die aktuelle Auswahl aktualisieren, nicht auf den useEffect warten
-      if (props.onSelectedItemChange && trousers.length > 0) {
+      if (props.onSelectedItemChange) {
         props.onSelectedItemChange(trousers[index]);
+      }
+    } else {
+      // Wenn der Index auf den "Add Button" zeigt (letztes Element), setze die Auswahl auf null
+      if (props.onSelectedItemChange) {
+        props.onSelectedItemChange(null);
       }
     }
   };
