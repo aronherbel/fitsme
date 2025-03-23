@@ -1,11 +1,21 @@
 import { View, Alert, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useState} from 'react';
+import { useState, useEffect } from 'react';
 
 import ClothingCarousel from '../ClothingCarousel';
 
-export default function UpperClothing() {
+export default function UpperClothing(props) {
   const [upperClothes, setUpperClothes] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  
+  // Wenn sich das ausgewählte Element ändert, benachrichtige die Eltern-Komponente
+  useEffect(() => {
+    if (props.onSelectedItemChange && upperClothes.length > 0 && selectedIndex < upperClothes.length) {
+      props.onSelectedItemChange(upperClothes[selectedIndex]);
+    } else if (props.onSelectedItemChange) {
+      props.onSelectedItemChange(null);
+    }
+  }, [selectedIndex, upperClothes, props.onSelectedItemChange]);
 
   // Bild auswählen (Galerie)
   const pickImageAsync = async () => {
@@ -65,9 +75,58 @@ export default function UpperClothing() {
     );
   };
 
+  // Bild löschen
+  const handleDelete = (index) => {
+    Alert.alert(
+      'Bild löschen',
+      'Möchtest du dieses Kleidungsstück wirklich löschen?',
+      [
+        { text: 'Abbrechen', style: 'cancel' },
+        { 
+          text: 'Löschen', 
+          style: 'destructive',
+          onPress: () => {
+            const newClothes = [...upperClothes];
+            newClothes.splice(index, 1);
+            setUpperClothes(newClothes);
+            
+            // Wenn das aktuell gewählte Element gelöscht wurde
+            if (index === selectedIndex) {
+              if (newClothes.length > 0) {
+                // Wähle das vorherige Element oder das erste Element
+                setSelectedIndex(Math.min(index, newClothes.length - 1));
+              } else {
+                setSelectedIndex(0);
+              }
+            } else if (index < selectedIndex) {
+              // Wenn ein Element vor dem ausgewählten Element gelöscht wurde, passe den Index an
+              setSelectedIndex(selectedIndex - 1);
+            }
+          } 
+        },
+      ]
+    );
+  };
+  
+  // Aktuelles Element verfolgen, wenn durch die Bilder gewischt wird
+  const handleScroll = (index) => {
+    if (index < upperClothes.length) {
+      setSelectedIndex(index);
+      // Sofort die aktuelle Auswahl aktualisieren, nicht auf den useEffect warten
+      if (props.onSelectedItemChange && upperClothes.length > 0) {
+        props.onSelectedItemChange(upperClothes[index]);
+      }
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <ClothingCarousel items={upperClothes} onAddPress={handleAdd}/>
+    <View style={[styles.container, props.style]}>
+      <ClothingCarousel 
+        items={upperClothes} 
+        onAddPress={handleAdd}
+        onDeletePress={handleDelete}
+        onItemChange={handleScroll}
+      />
     </View>
   );
 }

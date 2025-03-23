@@ -1,19 +1,29 @@
 import { View, Alert, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useState} from 'react';
+import { useState, useEffect } from 'react';
 
 import ClothingCarousel from '../ClothingCarousel';
 
-export default function Trousers() {
+export default function Trousers(props) {
   const [trousers, setTrousers] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  
+  // Wenn sich das ausgewählte Element ändert, benachrichtige die Eltern-Komponente
+  useEffect(() => {
+    if (props.onSelectedItemChange && trousers.length > 0 && selectedIndex < trousers.length) {
+      props.onSelectedItemChange(trousers[selectedIndex]);
+    } else if (props.onSelectedItemChange) {
+      props.onSelectedItemChange(null);
+    }
+  }, [selectedIndex, trousers, props.onSelectedItemChange]);
 
   // Bild auswählen (Galerie)
   const pickImageAsync = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          alert('Wir brauchen Galerie-Zugriff!');
-          return;
-        }
+    if (status !== 'granted') {
+      alert('Wir brauchen Galerie-Zugriff!');
+      return;
+    }
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
@@ -65,9 +75,58 @@ export default function Trousers() {
     );
   };
 
+  // Bild löschen
+  const handleDelete = (index) => {
+    Alert.alert(
+      'Bild löschen',
+      'Möchtest du diese Hose wirklich löschen?',
+      [
+        { text: 'Abbrechen', style: 'cancel' },
+        { 
+          text: 'Löschen', 
+          style: 'destructive',
+          onPress: () => {
+            const newTrousers = [...trousers];
+            newTrousers.splice(index, 1);
+            setTrousers(newTrousers);
+            
+            // Wenn das aktuell gewählte Element gelöscht wurde
+            if (index === selectedIndex) {
+              if (newTrousers.length > 0) {
+                // Wähle das vorherige Element oder das erste Element
+                setSelectedIndex(Math.min(index, newTrousers.length - 1));
+              } else {
+                setSelectedIndex(0);
+              }
+            } else if (index < selectedIndex) {
+              // Wenn ein Element vor dem ausgewählten Element gelöscht wurde, passe den Index an
+              setSelectedIndex(selectedIndex - 1);
+            }
+          } 
+        },
+      ]
+    );
+  };
+  
+  // Aktuelles Element verfolgen, wenn durch die Bilder gewischt wird
+  const handleScroll = (index) => {
+    if (index < trousers.length) {
+      setSelectedIndex(index);
+      // Sofort die aktuelle Auswahl aktualisieren, nicht auf den useEffect warten
+      if (props.onSelectedItemChange && trousers.length > 0) {
+        props.onSelectedItemChange(trousers[index]);
+      }
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <ClothingCarousel items={trousers} onAddPress={handleAdd} />
+    <View style={[styles.container, props.style]}>
+      <ClothingCarousel 
+        items={trousers} 
+        onAddPress={handleAdd}
+        onDeletePress={handleDelete}
+        onItemChange={handleScroll}
+      />
     </View>
   );
 }

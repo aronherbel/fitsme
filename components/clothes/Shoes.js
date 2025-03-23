@@ -4,8 +4,18 @@ import { useState, useEffect } from 'react';
 
 import ClothingCarousel from '../ClothingCarousel';
 
-export default function Shoes() {
+export default function Shoes(props) {
   const [shoes, setShoes] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  
+  // Wenn sich das ausgewählte Element ändert, benachrichtige die Eltern-Komponente
+  useEffect(() => {
+    if (props.onSelectedItemChange && shoes.length > 0 && selectedIndex < shoes.length) {
+      props.onSelectedItemChange(shoes[selectedIndex]);
+    } else if (props.onSelectedItemChange) {
+      props.onSelectedItemChange(null);
+    }
+  }, [selectedIndex, shoes, props.onSelectedItemChange]);
 
   // Bild auswählen (Galerie)
   const pickImageAsync = async () => {
@@ -65,9 +75,58 @@ export default function Shoes() {
     );
   };
 
+  // Bild löschen
+  const handleDelete = (index) => {
+    Alert.alert(
+      'Bild löschen',
+      'Möchtest du diese Schuhe wirklich löschen?',
+      [
+        { text: 'Abbrechen', style: 'cancel' },
+        { 
+          text: 'Löschen', 
+          style: 'destructive',
+          onPress: () => {
+            const newShoes = [...shoes];
+            newShoes.splice(index, 1);
+            setShoes(newShoes);
+            
+            // Wenn das aktuell gewählte Element gelöscht wurde
+            if (index === selectedIndex) {
+              if (newShoes.length > 0) {
+                // Wähle das vorherige Element oder das erste Element
+                setSelectedIndex(Math.min(index, newShoes.length - 1));
+              } else {
+                setSelectedIndex(0);
+              }
+            } else if (index < selectedIndex) {
+              // Wenn ein Element vor dem ausgewählten Element gelöscht wurde, passe den Index an
+              setSelectedIndex(selectedIndex - 1);
+            }
+          } 
+        },
+      ]
+    );
+  };
+  
+  // Aktuelles Element verfolgen, wenn durch die Bilder gewischt wird
+  const handleScroll = (index) => {
+    if (index < shoes.length) {
+      setSelectedIndex(index);
+      // Sofort die aktuelle Auswahl aktualisieren, nicht auf den useEffect warten
+      if (props.onSelectedItemChange && shoes.length > 0) {
+        props.onSelectedItemChange(shoes[index]);
+      }
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <ClothingCarousel items={shoes} onAddPress={handleAdd} />
+    <View style={[styles.container, props.style]}>
+      <ClothingCarousel 
+        items={shoes} 
+        onAddPress={handleAdd}
+        onDeletePress={handleDelete}
+        onItemChange={handleScroll}
+      />
     </View>
   );
 }
